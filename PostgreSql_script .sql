@@ -185,3 +185,4 @@ ALTER TABLE "public"."users" ALTER COLUMN "id" SET DEFAULT nextval('"public"."us
 
 INSERT INTO "public"."job_titles" (title) 
 VALUES ('Software Developer'),('Software Architect');
+INSERT INTO "public"."users" (email,password) VALUES('enesaras551@gmail.com','123456')
