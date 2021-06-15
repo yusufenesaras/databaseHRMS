@@ -13,6 +13,79 @@ CREATE TABLE public.candidates
     PRIMARY KEY (id)
 );
 
+CREATE TABLE public.candidates_cv
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    candidate_id integer NOT NULL,
+    linkedin_address character varying,
+    github_address character varying,
+    cover_letter text NOT NULL,
+    is_active boolean NOT NULL,
+    avatar_url character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE public.candidates_cv
+    IS 'Adayların CV Tablosu';
+
+COMMENT ON COLUMN public.candidates_cv.candidate_id
+    IS 'ÖN SÖZ';
+
+COMMENT ON COLUMN public.candidates_cv.is_active
+    IS 'Öne Çıkan CV';
+
+CREATE TABLE public.candidates_cv_school
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    school_name character varying NOT NULL,
+    entry_date date NOT NULL,
+    graduation_date date,
+    department character varying NOT NULL,
+    candidates_cv_id integer NOT NULL,
+    is_continue boolean,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE public.candidates_cv_school
+    IS 'Okullar';
+
+COMMENT ON COLUMN public.candidates_cv_school.department
+    IS 'Meslek';
+
+CREATE TABLE public.candidates_job_experiences
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    workplace_name character varying NOT NULL,
+    entry_date date NOT NULL,
+    exit_date date,
+    job_titles_id integer NOT NULL,
+    candidates_cv_id integer NOT NULL,
+    is_continue boolean NOT NULL,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE public.candidates_job_experiences
+    IS ' İŞ DENEYİMLERİ';
+
+CREATE TABLE public.candidates_lang
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    candidates_cv_id integer NOT NULL,
+    languages_id integer NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.candidates_talent
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    talents_id integer NOT NULL,
+    candidates_cv_id integer NOT NULL,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE public.candidates_talent
+    IS 'İş arayan yetenekleri';
+
 CREATE TABLE public.cities
 (
     id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
@@ -60,6 +133,8 @@ CREATE TABLE public.job_advertisements
     created_date timestamp without time zone,
     min_salary double precision NOT NULL,
     max_salary double precision NOT NULL,
+    work_hours_id integer NOT NULL,
+    work_types_id integer NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -69,6 +144,30 @@ CREATE TABLE public.job_titles
     title character varying(50),
     PRIMARY KEY (id)
 );
+
+CREATE TABLE public.languages
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    languages_name character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.system_users
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    user_id integer NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.talents
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    talent_name character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE public.talents
+    IS 'Yetenekler Tablosu';
 
 CREATE TABLE public.users
 (
@@ -87,9 +186,71 @@ CREATE TABLE public.verification_codes
     PRIMARY KEY (id)
 );
 
+CREATE TABLE public.work_hours
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    work_hours character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE public.work_types
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    work_type character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
 ALTER TABLE public.candidates
     ADD FOREIGN KEY (id)
     REFERENCES public.users (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_cv
+    ADD FOREIGN KEY (candidate_id)
+    REFERENCES public.candidates (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_cv_school
+    ADD FOREIGN KEY (candidates_cv_id)
+    REFERENCES public.candidates_cv (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_job_experiences
+    ADD FOREIGN KEY (candidates_cv_id)
+    REFERENCES public.candidates_cv (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_job_experiences
+    ADD FOREIGN KEY (job_titles_id)
+    REFERENCES public.job_titles (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_lang
+    ADD FOREIGN KEY (candidates_cv_id)
+    REFERENCES public.candidates_cv (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_lang
+    ADD FOREIGN KEY (languages_id)
+    REFERENCES public.languages (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_talent
+    ADD FOREIGN KEY (candidates_cv_id)
+    REFERENCES public.candidates_cv (id)
+    NOT VALID;
+
+
+ALTER TABLE public.candidates_talent
+    ADD FOREIGN KEY (talents_id)
+    REFERENCES public.talents (id)
     NOT VALID;
 
 
@@ -132,6 +293,24 @@ ALTER TABLE public.job_advertisements
 ALTER TABLE public.job_advertisements
     ADD FOREIGN KEY (job_title_id)
     REFERENCES public.job_titles (id)
+    NOT VALID;
+
+
+ALTER TABLE public.job_advertisements
+    ADD FOREIGN KEY (work_hours_id)
+    REFERENCES public.work_hours (id)
+    NOT VALID;
+
+
+ALTER TABLE public.job_advertisements
+    ADD FOREIGN KEY (work_types_id)
+    REFERENCES public.work_types (id)
+    NOT VALID;
+
+
+ALTER TABLE public.system_users
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public.users (id)
     NOT VALID;
 
 
